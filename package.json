@@ -36,5 +36,8 @@
   "bugs": {
     "url": "https://github.com/ismailceylan/huffmanjs/issues"
   },
-  "homepage": "https://github.com/ismailceylan/huffmanjs#readme"
+  "homepage": "https://github.com/ismailceylan/huffmanjs#readme",
+  "devDependencies": {
+    "vite": "^5.3.5"
+  }
 }
