@@ -47,6 +47,7 @@ And the latest 5 bytes `2¤ ½˜` represents the compressed form of `Hello world
 Huffman codes is a map to convert characters into ones and the zeros as string. Library generates it from the original data. After we convert all the characters in the original data into Huffman codes, we divide them into groups of 8 and convert them into ascii characters. The easiest way to get the original data from the compressed data is use this map.
 
 ```js
+const huffmanCodes =
 [
 	{ "010": "H" },
 	{ "110": "e" },
@@ -69,7 +70,7 @@ const unserialized = unserializeBitmap( serialized );
 // [{"010":"H"},{"110":"e"},{"001":"l"},{"111":"o"}]
 ```
 
-The serialized data can easily can be stored as plain text anywhere because it uses fixed 8 bits per character ASCII encoding.
+The serialized data can easily be stored as plain text anywhere because it uses fixed 8 bits per character ASCII encoding.
 
 ### Decompression
 We can easily decompress the compressed binary data.
@@ -85,7 +86,7 @@ const decompressed = decompress( compressedBinary );
 ```
 
 #### Decompression with External Code Table
-With this scenario, we can decompress the compressed binary data with external code table. The binary still contains its own Huffman code in it but this time, the given Huffman code map will be used to decompress the data. If it fails then it will warn and try to decompress the data with the Huffman code that is stored in the binary. If the data doesn't have it then it will throw an error.
+With this scenario, we can decompress the compressed binary data with external code table. The binary will be allowed to contain its own Huffman code in it but this time, the given Huffman code map will be used to decompress the data. If it fails then it will warn and try to decompress the data with the Huffman code that is stored in the binary. If the data doesn't have it then it will throw an error. If the data doesn't have the Huffman code in it then it will throw an error.
 
 ```js
 import { decompress } from "@iceylan/huffmanjs";
