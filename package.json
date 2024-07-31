@@ -1,0 +1,40 @@
+{
+  "name": "@iceylan/huffmanjs",
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "description": "A javascript library that compress and uncompress given string using Huffman algorithm.",
+  "main": "./dist/huffmanjs.umd.cjs",
+  "module": "./dist/huffmanjs.js",
+  "exports": {
+    ".": {
+      "import": "./dist/huffmanjs.js",
+      "require": "./dist/huffmanjs.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "release": "standard-version",
+    "publish-package": "npm publish --access=public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ismailceylan/huffmanjs.git"
+  },
+  "keywords": [
+    "huffman",
+    "compression",
+    "lossless",
+    "javascript"
+  ],
+  "author": "Ismail Ceylan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ismailceylan/huffmanjs/issues"
+  },
+  "homepage": "https://github.com/ismailceylan/huffmanjs#readme"
+}
