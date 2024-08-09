@@ -24,59 +24,79 @@ const [ compressedBinary, huffmanCodes ] = compress( "Hello world!" );
 `compressedBinary` holds the compressed binary data.
 
 ```
-Ñur! 3 rà5ŸdÀ5Ÿl€6Ÿ!`5Ÿo@5ŸH04Ÿe 4Ÿ 4Ÿw 4ÿÿ2¤ ½˜
+Ñur! !Hdelo
+rwÿÿíSºí	
 ```
 
-The first 4 bytes of the binary data is the magic bytes of the library which we can easily change to any length of something else we want from `lib/constants.js` file.
+##### Magic Bytes
+The first 4 bytes `Ñur!` of the binary data is the magic bytes of the library which we can easily change to any length of something else we want from `lib/constants.js` file.
 
-Next one byte is a separator byte which we can easily change it, too.
+##### Zero Padding
+Next byte indicates the length of the zero padding that added to the encoded data's latest byte to complete it to 8 bits. It was a number from `0` to `7` and we used it as a char code and put there its corresponding character. So, we can easily decode it with `"".charCodeAt(0)` method.
 
-Next byte can be numbers from `0` to `7`, which represents the length of the zero bits that added to the encoded data's latest byte to complete it to 8 bits.
+##### Meta Datas
+And the `ÿÿ` characters at the 23rd byte is used to declare the end of the meta definitions. If we slice bytes from the padding character to the `ÿÿ` character, we'll get the encoded form of the Huffman codes.
 
-Next one is again a separator byte.
+##### Huffman Codes
+It uses fixed length byte allocation technique to encode the Huffman codes. Every `{decimal:binary string}` pair lives in 32 bit capacity. 
 
-And the `ÿÿ` characters at the 43rd byte is used to declare the end of the meta definitions. Until that point, all the encoded characters belongs to Huffman codes.
+It converts all the character that used in the original data to the decimal numbers. So multibyte characters like emojis or chinese characters are also supported.
 
-Every `Ÿ` character of the Huffman code part is the separator that splits the chunks of the Huffman code. which can changeable.
+It allocates 16 bit for the decimal representation of the character which it can be 0 to 65535. It encodes them into binary form and adds the missing bits at the start as zeros and convert them into characters. So first 2 byte will give us a char code.
 
-For example the first Huffman code chunk `rà5` consists of 3 abstract part. First byte `r` represents the original character that before compression. Latest one that consists of single digit numeric byte `5` represents the length of the zero bits that added to the Huffman code of the chunk's latest byte to complete it to 8 bits and the middle part of these two's which can be any length but 1 or 2 at most, represents the encoded forms of the Huffman code that related to the original character of the chunk. After decoding the chunk, result should look like `{"011": "r"}` which it can be used to decode the original data.
+After that, it allocates 16 bit for the huffman code that calculated for the character. Huffman codes mostly uses 2-11 bits which 16 was fair enough. It also adds missed bits at the start as zeros to complete it to 16 bits. After that, it converts them into characters.
 
-And the latest 5 bytes `2¤ ½˜` represents the compressed form of `Hello world!`.
+##### Compressed Data
+And the latest 5 bytes `íSºí` represents the compressed form of `Hello world!`. To decode it, we need to convert characters to decimal numbers. Then we need to convert decimal numbers to binary form. Then we need to remove the padding zeros. And finally, we can start search the Huffman codes in that bit stack. If we find the huffman code, we can replace it with the character. At the end, we would get the original data.
 
-#### Explanation of the Huffman Codes
-Huffman codes is a map to convert characters into ones and the zeros as string. Library generates it from the original data. After we convert all the characters in the original data into Huffman codes, we divide them into groups of 8 and convert them into ascii characters. The easiest way to get the original data from the compressed data is use this map.
+#### Serialization and Deserialization of the Huffman Codes
+Huffman codes is a map to convert characters into ones and the zeros as string. After the library calculates the huffman code for all the characters in the original data, it converts characters into short huffman codes. Then it divide them into groups of 8 and reencode them into decimals and the decimals into characters. The easiest way to get the original data from the compressed data is use this map.
 
+Calculated Huffman codes will look like this:
 ```js
-const huffmanCodes =
-[
-	{ "010": "H" },
-	{ "110": "e" },
-	{ "001": "l" },
-	{ "111": "o" },
-]
+{
+	108: "110",
+	101: "1111",
+	111: "1010",
+	114: "1110",
+	119: "1011",
+	32: "10011",
+	33: "10010",
+	72: "10001",
+	100: "10000"
+}
 ```
 
-The library provides Huffman code serialization and deserialization ability. If we want to store the code table in the somewhere else rather than the binary data, we can serialize it to save some space.
+Even if we remove the whitespaces it could use 120 bytes. But the library provides Huffman code serialization and deserialization ability. If we want to store the code table in the somewhere else rather than the binary data, we can serialize it to save some space.
 
 ```js
-import { serializeBitmap, unserializeBitmap } from "@iceylan/huffmanjs";
+import { serializeBitmap } from "@iceylan/huffmanjs";
 
 const serialized = serializeBitmap( huffmanCodes );
-// it returns
-// rà5ŸdÀ5Ÿl€6Ÿ!`5Ÿo@5ŸH04Ÿe 4Ÿ 4Ÿw 4
-
-const unserialized = unserializeBitmap( serialized );
-// it returns
-// [{"010":"H"},{"110":"e"},{"001":"l"},{"111":"o"}]
 ```
 
-The serialized data can easily be stored as plain text anywhere because it uses fixed 8 bits per character ASCII encoding.
+```
+ !Hdelo
+rw
+```
+
+and the length will be (9 entry x 32 bits = 288 bits = 36 bytes).
+
+We can deserialize the code table and use the result to pass decompress method to decompress the headless compressed binary data.
+
+```js
+import { unserializeBitmap } from "@iceylan/huffmanjs";
+
+const unserialized = unserializeBitmap( serialized );
+```
+
+Result will be an object that looks the same as the original huffman code and `decompress` method will accept it to decompress the binary data.
 
 ### Decompression
 We can easily decompress the compressed binary data.
 
 #### Standalone Decompression
-With this scenario, we can decompress the compressed binary data without any additional code table. The binary has it's own Huffman code in it so it can decompress itself.
+With this scenario, we can decompress the compressed binary data without huffman code map. The binary has it's own Huffman code in it so it can decompress itself.
 
 ```js
 import { decompress } from "@iceylan/huffmanjs";
