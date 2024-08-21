@@ -44,13 +44,13 @@ It converts all the character that used in the original data to the decimal numb
 
 It allocates 16 bit for the decimal representation of the character which it can be 0 to 65535. It encodes them into binary form and adds the missing bits at the start as zeros and convert them into characters. So first 2 byte will give us a char code.
 
-After that, it allocates 16 bit for the huffman code that calculated for the character. Huffman codes mostly uses 2-11 bits which 16 was fair enough. It also adds missed bits at the start as zeros to complete it to 16 bits. After that, it converts them into characters.
+After that, it allocates 16 bit for the huffman code that calculated for the character. Huffman codes mostly uses 2-13 bits which 16 was fair enough. It also adds missed bits at the start as zeros to complete it to 16 bits. After that, it converts them into characters.
 
 ##### Compressed Data
 And the latest 5 bytes `íSºí` represents the compressed form of `Hello world!`. To decode it, we need to convert characters to decimal numbers. Then we need to convert decimal numbers to binary form. Then we need to remove the padding zeros. And finally, we can start search the Huffman codes in that bit stack. If we find the huffman code, we can replace it with the character. At the end, we would get the original data.
 
 #### Serialization and Deserialization of the Huffman Codes
-Huffman codes is a map to convert characters into ones and the zeros as string. After the library calculates the huffman code for all the characters in the original data, it converts characters into short huffman codes. Then it divide them into groups of 8 and reencode them into decimals and the decimals into characters. The easiest way to get the original data from the compressed data is use this map.
+Huffman codes is a map to convert characters into ones and the zeros as string and backwards. After the library calculates the huffman code for all the characters in the original data, it converts characters into short huffman codes. Then it divide them into groups of 8 and reencode them into decimals and the decimals into characters. The easiest way to get the original data from the compressed data is use this map.
 
 Calculated Huffman codes will look like this:
 ```js
@@ -70,9 +70,9 @@ Calculated Huffman codes will look like this:
 Even if we remove the whitespaces it could use 120 bytes. But the library provides Huffman code serialization and deserialization ability. If we want to store the code table in the somewhere else rather than the binary data, we can serialize it to save some space.
 
 ```js
-import { serializeBitmap } from "@iceylan/huffmanjs";
+import { serializeHuffmanCode } from "@iceylan/huffmanjs";
 
-const serialized = serializeBitmap( huffmanCodes );
+const serialized = serializeHuffmanCode( huffmanCodes );
 ```
 
 ```
@@ -85,9 +85,9 @@ and the length will be (9 entry x 32 bits = 288 bits = 36 bytes).
 We can deserialize the code table and use the result to pass decompress method to decompress the headless compressed binary data.
 
 ```js
-import { unserializeBitmap } from "@iceylan/huffmanjs";
+import { unserializeHuffmanCode } from "@iceylan/huffmanjs";
 
-const unserialized = unserializeBitmap( serialized );
+const unserialized = unserializeHuffmanCode( serialized );
 ```
 
 Result will be an object that looks the same as the original huffman code and `decompress` method will accept it to decompress the binary data.
@@ -106,11 +106,11 @@ const decompressed = decompress( compressedBinary );
 ```
 
 #### Decompression with External Code Table
-With this scenario, we can decompress the compressed binary data with external code table. The binary will be allowed to contain its own Huffman code in it but this time, the given Huffman code map will be used to decompress the data. If it fails then it will warn and try to decompress the data with the Huffman code that is stored in the binary. If the data doesn't have it then it will throw an error. If the data doesn't have the Huffman code in it then it will throw an error.
+With this scenario, we can decompress the compressed binary data with external code table. The binary will be allowed to contain its own Huffman code in it but this time, externally given Huffman code map will be used to decompress the data. If it fails then it will warn and try to decompress the data with the Huffman code that is stored in the binary. If the binary doesn't have it then it will throw an error.
 
 ```js
 import { decompress } from "@iceylan/huffmanjs";
 
-const decompressed = decompress( compressedBinary, huffmanCodes );
+const decompressed = decompress( compressedBinary, unserialized );
 // Hello world!
 ```
