@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>AST Generator</title>
+	<title>huffmanjs</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<style>
@@ -18,7 +18,7 @@
 
 		#top-bar { 
 			background-color: #151515;
-			padding: 5px;
+			padding: 10px;
 			color: #fff;
 			text-align: right;
 			font: 500 15px "Segoe UI";
@@ -61,10 +61,24 @@
 			overflow-y: auto;
 			border-bottom: 1px solid #000;
 			background-color: #2e2e2e;
+			word-break: break-word;
 
 			&:hover {
 				flex: 2750%;
 			}
+		}
+
+
+		#matches {
+			background-color: silver;
+			width: 12px;
+			height: 12px;
+			display: inline-block;
+			border-radius: 50%;
+		}
+
+		#matches.yes {
+			background-color: #36ff00;
 		}
 
 		#compiled
@@ -72,12 +86,16 @@
 			border-top: 1px solid #494949;
 			flex: 700%;
 			padding: 15px;
-			font: 500 19px/34px "Segoe UI";
+			font: 500 19px/34px monospace;
 			color: #bbb;
 			overflow: hidden;
 			overflow-y: auto;
 			background-color: #1a1a1a;
 			white-space: pre-wrap;
+			word-break: break-word;
+			display: flex;
+			align-content: flex-start;
+			gap: 40px;
 
 			a {
 				color: #1feb0a;
@@ -182,17 +200,40 @@
 				margin-block: 15px 10px;
 				opacity: 0.4;
 			}
+
+			> div {
+				flex-basis: 100%;
+			}
+
+			#hex {
+				display: flex;
+				gap: 0 10px;
+				flex-direction: row;
+				flex-wrap: wrap;
+				align-content: flex-start;
+				color: #fff;
+        		font-weight: 900;
+			}
 		}
 	</style>
 </head>
 <body>
 	<main>
-		<div id="top-bar"></div>
+		<div id="top-bar">
+			<span title="indicates decompressed data is same as original">match: <b id="matches"></b></span> -
+			<span>time: <b id="comptime"></b></span> - 
+			<span>Original Size: <b id="origsize"></b></span> - 
+			<span>Compressed Size: <b id="compsize"></b></span> - 
+			<span>Compression Ratio: <b id="ratio"></b></span>
+		</div>
 		<aside id="content">
 			<textarea id="editor"></textarea>
 			<div id="preview">
 				<div id="source"></div>
-				<div id="compiled"></div>
+				<div id="compiled">
+					<div id="hex"></div>
+					<div id="bin"></div>
+				</div>
 			</div>
 		</aside>
 	</main>
