@@ -24,18 +24,18 @@ const [ compressedBinary, huffmanCodes ] = compress( "Hello world!" );
 `compressedBinary` holds the compressed binary data.
 
 ```
-Ñur! !Hdelo
-rwÿÿíSºí	
+íce9$ !Hdelo
+rwíSºí
 ```
 
 ##### Magic Bytes
-The first 4 bytes `Ñur!` of the binary data is the magic bytes of the library which we can easily change to any length of something else we want from `lib/constants.js` file.
+The first 4 bytes `íce9` of the binary data is the magic bytes of the library which we can easily change to any length of something else we want from `lib/constants.js` file.
 
 ##### Zero Padding
-Next byte indicates the length of the zero padding that added to the encoded data's latest byte to complete it to 8 bits. It was a number from `0` to `7` and we used it as a char code and put there its corresponding character. So, we can easily decode it with `"".charCodeAt(0)` method.
+Next byte indicates the length of the zero padding that added to the encoded data's latest byte to complete it to 8 bits. It was a number from `0` to `7` and we used it as a decimal character code and put there its corresponding character. So, we can easily decode it with `"".charCodeAt(0)` method.
 
 ##### Meta Datas
-And the `ÿÿ` characters at the 23rd byte is used to declare the end of the meta definitions. If we slice bytes from the padding character to the `ÿÿ` character, we'll get the encoded form of the Huffman codes.
+Next 2 bytes are encoded form of the length of the serialized (encoded) huffman codes. 16 bit can hold 1 to 65536 numbers. That means as long as the huffman table does not exceed the 64 kilobyte limit, there is no problem.
 
 ##### Huffman Codes
 It uses fixed length byte allocation technique to encode the Huffman codes. Every `{decimal:binary string}` pair lives in 32 bit capacity. 
