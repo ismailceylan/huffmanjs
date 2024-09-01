@@ -21,9 +21,14 @@ function update()
 	if( text )
 	{
 		const s = performance.now();
-		const [ compressed, huffmanCode ] = compress( text );
+		const [ compressed, huffmanCode, onlyCompressed, encodedHuffmanCodes ] = compress( text );
 		const decoded = decompress( compressed );
 		const e = performance.now();
+
+		const decompressedWithExternalCodeTable = decompress(
+			onlyCompressed,
+			encodedHuffmanCodes
+		);
 
 		source.innerHTML = JSON.stringify( huffmanCode );
 		origsize.innerHTML = text.length;
@@ -34,7 +39,7 @@ function update()
 
 		hexify( compressed );
 
-		if( decoded === text )
+		if( decoded === text && decompressedWithExternalCodeTable === text )
 		{
 			matches.classList.add( "yes" );
 		}
