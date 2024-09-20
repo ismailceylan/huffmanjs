@@ -38,16 +38,20 @@ Next byte indicates the length of the zero padding that added to the encoded dat
 Next 2 bytes are encoded form of the length of the serialized (encoded) huffman codes. 16 bit can hold 1 to 65536 numbers. That means as long as the huffman table does not exceed the 64 kilobyte limit, there is no problem.
 
 ##### Huffman Codes
-It uses fixed length byte allocation technique to encode the Huffman codes. Every `{decimal:binary string}` pair lives in 32 bit capacity. 
+It uses fixed length byte allocation technique to encode the Huffman codes. After encoding, every `{decimal:binary string}` pair lives in 32 bit capacity.
 
-It converts all the character that used in the original data to the decimal numbers. So multibyte characters like emojis or chinese characters are also supported.
+That means if we split encoded form of the huffman codes into 4 bytes chunks, every chunk of it will give us an entry of the huffman map.
 
-It allocates 16 bit for the decimal representation of the character which it can be 0 to 65535. It encodes them into binary form and adds the missing bits at the start as zeros and convert them into characters. So first 2 byte will give us a char code.
+When the library start to compress the data, it handles all the character that used in the raw data with their decimal representation and starts to calculate their frequency and it stack them in a map with their decimal representation and frequency. That allows the library to handle multibyte characters like emojis or chinese characters.
 
-After that, it allocates 16 bit for the huffman code that calculated for the character. Huffman codes mostly uses 2-13 bits which 16 was fair enough. It also adds missed bits at the start as zeros to complete it to 16 bits. After that, it converts them into characters.
+Library allocates 16 bits for the decimal representation of the character which it can be 0 to 65535. It encodes them into binary form and adds the missing bits at the start as zeros to complete it to 16 and split those bits into 8 bits chunks. After that, it convert them into 256 based Extended ASCII characters. So, at the decompression stage, the first 2 byte of the chunk will give us a char code.
+
+After that, the library allocates 16 bit for the huffman code that calculated for the character. Huffman codes mostly uses 1-13 bits which 16 was fair enough. Since we have some bits, library will just add missed bits at the start as zeros to complete it to 16 bits. After that, it converts them into extended ASCII characters. So, at the decompression stage, the latest 2 byte of the chunk will give us the huffman code of the character.
+
+We repeat this process until we consume all the 4 byte chunks to decode the huffman codes.
 
 ##### Compressed Data
-And the latest 5 bytes `íSºí` represents the compressed form of `Hello world!`. To decode it, we need to convert characters to decimal numbers. Then we need to convert decimal numbers to binary form. Then we need to remove the padding zeros. And finally, we can start search the Huffman codes in that bit stack. If we find the huffman code, we can replace it with the character. At the end, we would get the original data.
+And the latest 5 bytes `íSºí` represents the compressed form of `Hello world!`. To decode it, we need to convert every decoded characters to decimal numbers. Then we need to convert decimal numbers to binary form. Then we need to remove the padding zeros (remember, we got the numbers of the added zeros from next byte of the magic bytes). And finally, we can start search the Huffman codes in that bit stack. If we find the huffman code, we can replace it with the character. At the end, we would get the original data.
 
 #### Serialization and Deserialization of the Huffman Codes
 Huffman codes is a map to convert characters into ones and the zeros as string and backwards. After the library calculates the huffman code for all the characters in the original data, it converts characters into short huffman codes. Then it divide them into groups of 8 and reencode them into decimals and the decimals into characters. The easiest way to get the original data from the compressed data is use this map.
