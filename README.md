@@ -51,7 +51,7 @@ After that, the library allocates 16 bit for the huffman code that calculated fo
 We repeat this process until we consume all the 4 byte chunks to decode the huffman codes.
 
 ##### Compressed Data
-And the latest 5 bytes `íSºí` represents the compressed form of `Hello world!`. To decode it, we need to convert every decoded characters to decimal numbers. Then we need to convert decimal numbers to binary form. Then we need to remove the padding zeros (remember, we got the numbers of the added zeros from next byte of the magic bytes). And finally, we can start search the Huffman codes in that bit stack. If we find the huffman code, we can replace it with the character. At the end, we would get the original data.
+And the latest 5 bytes `íSºí` represents the compressed form of `Hello world!`. To decode it, we need to convert every encoded character to decimal numbers. Then we need to convert decimal numbers to binary form. Then we need to remove the padding zeros (remember, we got the numbers of the added zeros from next byte of the magic bytes). And finally, we can start search the Huffman codes in that bit stack. If we find the huffman code, we can replace it with the character. At the end, we would get the original data.
 
 #### Serialization and Deserialization of the Huffman Codes
 Huffman codes is a map to convert characters into ones and the zeros as string and backwards. After the library calculates the huffman code for all the characters in the original data, it converts characters into short huffman codes. Then it divide them into groups of 8 and reencode them into decimals and the decimals into characters. The easiest way to get the original data from the compressed data is use this map.
